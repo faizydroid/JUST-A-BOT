@@ -1,0 +1,91 @@
+To pull transactions from the Solana blockchain, you can use a Solana RPC client library. Below is an example of how you can write a bot to pull transactions on Solana using Python and the solana Python package.
+
+Requirements:
+
+Python 3.x
+
+Install the Solana Python client library using pip:
+
+pip install solana
+
+
+Code Example:
+
+import json
+from solana.rpc.api import Client
+
+# Initialize the Solana client (using the mainnet RPC URL)
+solana_client = Client("https://api.mainnet-beta.solana.com")
+
+# Function to pull transactions for a specific wallet
+def get_transactions_for_wallet(wallet_address):
+    # Fetch the transaction history for the given wallet address
+    response = solana_client.get_confirmed_signature_for_address2(wallet_address, limit=10)  # Limit to the latest 10 transactions
+    
+    if response['result']:
+        print(f"Transactions for wallet {wallet_address}:")
+        for txn in response['result']:
+            print(f"\nTransaction Signature: {txn['signature']}")
+            print(f"Slot: {txn['slot']}")
+            print(f"Transaction Type: {txn.get('err', 'Success')}")
+            
+            # Fetch detailed transaction information
+            txn_details = solana_client.get_transaction(txn['signature'])
+            if txn_details['result']:
+                print(f"Transaction Details: {json.dumps(txn_details['result'], indent=2)}")
+            else:
+                print(f"Failed to fetch details for transaction {txn['signature']}")
+    else:
+        print(f"No transactions found for wallet {wallet_address}")
+
+# Example usage with a Solana wallet address
+wallet_address = "YourSolanaWalletAddressHere"  # Replace with your Solana wallet address
+get_transactions_for_wallet(wallet_address)
+
+Explanation:
+
+1. Client Initialization:
+We initialize the Solana client using the mainnet URL (https://api.mainnet-beta.solana.com). You can replace this URL with another Solana cluster URL (e.g., testnet or devnet) if needed.
+
+
+2. Fetching Transactions:
+The get_confirmed_signature_for_address2 method is used to get the transaction signatures for a given wallet address. We limit the number of transactions pulled by setting the limit parameter (e.g., 10 transactions).
+
+
+3. Fetching Transaction Details:
+For each transaction signature, we fetch detailed transaction information using get_transaction.
+
+
+4. Error Handling:
+If a transaction has an error (for instance, if the transaction failed), it will show up in the results. If the transaction details cannot be fetched, an error message will be displayed.
+
+
+5. Output:
+It prints out the signature, slot, transaction type (success/error), and transaction details for each transaction related to the provided wallet address.
+
+
+
+Example Output:
+
+Transactions for wallet YourSolanaWalletAddressHere:
+
+Transaction Signature: 3Qd1m5sJfvk6F5vP8kQs1hA2x36i6Z7d4uG9ub5MQ16fQyS7
+Slot: 12345678
+Transaction Type: Success
+Transaction Details:
+{
+  "transaction": { ... },  # Full transaction details
+  "meta": { ... }
+}
+
+Notes:
+
+Wallet Address: Replace "YourSolanaWalletAddressHere" with a valid Solana wallet address to fetch transactions for that address.
+
+Transaction Limit: The limit=10 fetches the latest 10 transactions. Adjust the limit if you need more or fewer transactions.
+
+Error Handling: Make sure to handle potential exceptions for network issues or incorrect wallet addresses.
+
+
+This bot will help you monitor and fetch transaction details on Solana for a specific wallet. You can extend this to filter specific types of transactions or automate it for continuous monitoring.
+
